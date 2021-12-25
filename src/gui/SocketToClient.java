@@ -4,6 +4,7 @@ package gui;
 //	object/data that is sent from the server to the client
  
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.*;
 
 public class SocketToClient extends Thread{
@@ -13,32 +14,36 @@ public class SocketToClient extends Thread{
 		this.socket = socket;
 		this.ledger = ledger;
 	}
-	
+	SentMessage in;         //Initialize SenetMessage object and object input stream
+	ObjectInputStream toUser;  
 	public void run() {             //Main run
-		ObjectInputStream toUser;   //ObjectInputStream is the literal stream passed to STC
-		SentMessage in;             //'in' is the object that one user has passed to the other user
 		
-		try {                       
-			toUser = new ObjectInputStream(socket.getInputStream());    //Attempt to create an ObjectInputStream through socket
-			                                                           //This is the reason for the Try-Catch Block
+		try {
+			toUser = new ObjectInputStream(socket.getInputStream());    //create object Input Stream
 			
-			while(toUser.available()>0) {                       //Checks that the user is still passing information through the stream
-				in = (SentMessage) toUser.readObject();         //Object stream is parsed back to object form to be utilized
+		}catch(Exception e) {
+			System.out.println("LEss bees more stufFF...:" + e);
+			
+		}
+		while(true) {	//run infinite loop
+			try {  
+				System.out.println("I AM loop");  
+				in = (SentMessage) toUser.readObject();  //read from ObjectInputStream and store Object
 				
-				if(ledger.id.equals(in.receiver)) {            //if the reciever matches the user ID of the client
-				    ledger.IncomingMessage(in);                //Display this message
+				System.out.println("gotcha @ " + in.receiver);
+				System.out.println(in.sender +":");
+				System.out.println("Ledger id:" + ledger.id);
+				
+				if(ledger.id.equals(in.receiver)) {     //if the reciever is equal to the UserID of the client
+					System.out.println(in.msg);         //then print the message
+				    Ledger.IncomingMessage(in, ledger.contacts);         //display to GUI
 				}
+				
+			} catch (Exception e) {
+				System.out.println("BEEEEES or something...: " + e);
+				continue; 
 			}
 			
-			try {                                               
-				socket.close();                                 //Attempt to close the socket
-//				System.out.println("Closing down my guy!");     //Farewell text
-			} catch (Exception e) {                             //If it somehow fails,
-//				System.out.println(e + "UMM idk");              //print this...
-			}
-			
-		} catch (Exception e) {                             //If the toUser ObjectInputStream could not be constructed
-//			System.out.println("No good!");                 //Inform the user as such
 		}   //End of catch block
 
 	}   //End of run method

@@ -6,7 +6,7 @@ import javax.swing.*;
 public class Gui {
 	
 	JFrame frame;
-	Ledger ledger;
+	volatile Ledger ledger;
 	
 	public Gui(String id) {
 		

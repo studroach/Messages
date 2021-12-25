@@ -1,5 +1,10 @@
 package gui;
 
+/*
+ * Holds the contact list for logged in users
+ * Keeps track of previously sent messages
+ */
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
@@ -7,9 +12,9 @@ import javax.swing.border.*;
 
 public class Contact {
 	
-	String name,id;
-	JButton contact;
-	Message messages;
+	String name,id; //user name and receiver ID
+	JButton contact; //add contact button
+	Message messages; //sent and received messages
 	JPanel board,panel;
 	JScrollPane pane;
 	JTextField note;
@@ -18,7 +23,7 @@ public class Contact {
 	int loc;
 	
 	public Contact(String Name, int pos, JFrame frame, JPanel window, ActionListener CC, String Id) {
-		
+		//Creating contact
 		name = Name;
 		id = Id;
 		loc = 0;
@@ -63,7 +68,7 @@ public class Contact {
 	}
 	
 	public static void AddC(String name, int pos, JFrame frame, JPanel window, Contact contacts, ActionListener CC, String id) {
-		
+		//populating contact list
 		Contact curr = contacts;
 		
 		while(curr.next != null) {
@@ -89,7 +94,7 @@ public class Contact {
 	
 	public static Contact GetConId(String id, Contact contacts) {
 		Contact curr = contacts;
-		while(curr.id != id && curr != null) {
+		while(curr != null && !curr.id.contentEquals(id)) {
 			
 			curr = curr.next;
 			

@@ -35,9 +35,6 @@ public class MyServerThread extends Thread
 	
 	public void run ()
 	{
-		//PrintToClient ptc = new PrintToClient(socket);
-		//Thread thread = new Thread (ptc);
-		//thread.start();
 		
 		try
 		{
@@ -45,26 +42,33 @@ public class MyServerThread extends Thread
 			clientOutput = new ObjectOutputStream(socket.getOutputStream()); //start an output stream, to send packets to users
 		}
 		catch (Exception e){} //This will never throw an exception so we're too lazy to take that into account.
-				
-		try {
-			while(clientInput.available()>0) //
-			{
-				sm = (SentMessage) clientInput.readObject();
+		while (true) {		
 			
-				if(sm.receiver==null) {
-					userLog[i++] = sm.sender;
+			try {
+		
+				sm = (SentMessage) clientInput.readObject();    // Sent message variable is taken from the input of the socket stream
+				
+				System.out.println(sm.sender +":");     //Sender of the package is shown
+				System.out.println(sm.msg);             //Whatever the user typed shows up here
+				
+				clientOutput.writeObject(sm);           //The object that was passed to server is then pushed to the other client
+				clientOutput.flush();
+				
+				clientInput = new ObjectInputStream(socket.getInputStream());   //Input stream grabs again from the socket 
+				if(sm.receiver==null) {             //If new client joins, then the sent reciever is set to null
+					userLog[i++] = sm.sender;       //The new client is added to an array of users available to message
 					
-				}else if(Arrays.asList(userLog).contains(sm.receiver)) {
-					clientOutput.writeObject(sm);
+				}else if(Arrays.asList(userLog).contains(sm.receiver)) {        //Checks if the reciever is contained within the array of possible recipients
+					clientOutput.writeObject(sm);               //Write the object/message and write it out to client
 					clientOutput.flush();
 					
 				}else{
-					SentMessage error = new SentMessage(sm.sender,sm.sender,"User doesn't exist :(");
-					clientOutput.writeObject(error);
+					SentMessage error = new SentMessage(sm.sender,sm.sender,"User doesn't exist :(");   //If the user is no not from either of the above scenarios
+					clientOutput.writeObject(error);                                                   //Inform of illeagel user and push the error message to client
 					clientOutput.flush();
 				}
-			}
-
-		}catch (Exception e) {return;}
+				
+			}catch (Exception e) {continue;}
+		}
 	}	
 }

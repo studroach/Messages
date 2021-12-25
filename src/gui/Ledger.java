@@ -15,8 +15,9 @@ public class Ledger {
 	AddContact addCon;
 	ActionListener AC,NC,CC,PE,LO;
 	int list;
-	String id;
-	boolean isRunning, newMessage;
+	String id, lastMessage;
+	boolean isRunning; 
+	volatile boolean newMessage = false;
 	
 	public Ledger(JFrame frame) {
 		
@@ -24,7 +25,7 @@ public class Ledger {
 		
 		//vars for client threads
 		isRunning = true;
-		newMessage = false;
+		//newMessage = false;
 		
 		//pointers that are empty at start
 		contacts = null;
@@ -102,16 +103,18 @@ public class Ledger {
 						
 						current.messages = new Message(message.getText(), current, 0, current.loc);
 						
+						lastMessage = message.getText();
+						
 						newMessage = true;
-						System.out.println(newMessage);
 						
 					}else if(!message.getText().isEmpty()){		//for future messages
 						
 						Message temp = Message.GetLast(current.messages);
 						temp.next = new Message(message.getText(), current, 0, current.loc);
 						
+						lastMessage = message.getText();
+						
 						newMessage = true;
-						System.out.println(newMessage);
 						
 					}
 					
@@ -199,21 +202,24 @@ public class Ledger {
 	}
 	
 	//method for incoming messages to be handled and stored by the gui
-	public void IncomingMessage(SentMessage obj) {
-		
-		Contact tempC = Contact.GetConId(obj.sender, contacts);
-		
-		if(tempC != null) {
-			
-			Message temp = Message.GetLast(tempC.messages);
-			temp.next = new Message(obj.msg, tempC, 1, tempC.loc);
-			
-		}else {
-			
-			System.out.println("message gui did not work, couldnt find contact with id: " + obj.sender);
-			
-		}
-		
-	}
+	public static void IncomingMessage(SentMessage obj, Contact cont) {
+
+        Contact tempC = Contact.GetConId(obj.sender, cont);
+
+        if(tempC != null) {
+        	if(tempC.messages == null) {
+        		tempC.messages = new Message(obj.msg, tempC, 1, tempC.loc);
+        	}else {
+            	Message temp = Message.GetLast(tempC.messages);
+            	temp.next = new Message(obj.msg, tempC, 1, tempC.loc);
+        	}
+
+        }else {
+
+            System.out.println("message gui did not work, couldnt find contact with id: " + obj.sender);
+
+        }
+
+    }
 	
 }
